@@ -1,0 +1,71 @@
+name: Build and Release Executable
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build HexAnalyzer Release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: 'maven'
+
+      - name: Build Fat JAR
+        run: |
+          mvn clean package -DskipTests
+          Copy-Item target/hex-analyzer-1.0.0.jar HexAnalyzer.jar -Force
+
+      - name: Compile Native Windows Launcher
+        run: |
+          & "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /target:winexe /win32icon:app.ico /out:HexAnalyzer.exe HexAnalyzerLauncher.cs
+
+      - name: Create Portable Zip Package
+        run: |
+          Compress-Archive -Path HexAnalyzer.exe, HexAnalyzer.jar, README.md, DOCUMENTATION.md, run.bat -DestinationPath HexAnalyzer-Windows-v1.0.0.zip -Force
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: "HexAnalyzer v1.0.0 - Desktop Binary & Hex Analyzer"
+          draft: false
+          prerelease: false
+          body: |
+            ## 🔮 HexAnalyzer v1.0.0 Release
+
+            A complete, high-performance Desktop Binary and Hex File Analyzer built in Java Swing with FlatLaf Dark theme.
+
+            ### 🚀 Assets Included in this Release:
+            - **`HexAnalyzer.exe`**: Native Windows 64-bit GUI executable launcher with embedded icon.
+            - **`HexAnalyzer-Windows-v1.0.0.zip`**: Complete portable bundle containing the executable, jar, and documentation.
+            - **`HexAnalyzer.jar`**: Cross-platform executable fat JAR.
+
+            ### ✨ Key Features:
+            - ⚡ **Three-Column Hex/Binary View**: Hex, 8-bit Binary, and ASCII with synchronized selection.
+            - ✍️ **In-Place Interactive Editing**: Direct byte typing with undo/redo (`Ctrl+Z` / `Ctrl+Y`) and dirty markers.
+            - 🔮 **Smart File Signature Detector**: Recognizes Java Class files (`CAFEBABE`), Java Serialized objects (`ACED0005`), PE/EXE, ELF, PNG, and more.
+            - 🔬 **Data Inspector**: Decodes selection into Binary, Int8, Int16, Int32, Int64, Float/Double (LE & BE), JVM Opcodes, and CRC32/Adler32.
+            - 📊 **Visual Entropy Heatmap**: Shannon entropy strip map with click-to-navigate.
+            - 📶 **256-Byte Histogram**: Byte frequency distribution with hover tooltips.
+            - ⚖️ **Binary Diff Tool**: Side-by-side binary comparison with similarity scoring.
+            - 📜 **String Extractor**: Scans readable ASCII/UTF-8 strings with live search filter.
+            - 📋 **Code Snippet Exporter**: Export selection as C/C++, Java, Python array, raw hex, or Base64.
+          files: |
+            HexAnalyzer.exe
+            HexAnalyzer.jar
+            HexAnalyzer-Windows-v1.0.0.zip

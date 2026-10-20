@@ -1,0 +1,22 @@
+# Compiled class files
+bin/
+*.class
+
+# Build directories
+target/
+build/
+.gradle/
+dist/
+build_fat/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Temporary logs and caches
+*.log
+.system_generated/

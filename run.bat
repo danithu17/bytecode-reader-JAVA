@@ -1,0 +1,3 @@
+@echo off
+echo Starting Modern Desktop Binary & Hex File Analyzer...
+java -cp "HexAnalyzer.jar;lib\*" com.analyzer.hex.HexAnalyzerApp %*
