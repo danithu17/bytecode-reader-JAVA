@@ -26,6 +26,7 @@ public class HexAnalyzerApp extends JFrame {
     private FileMetadataPanel fileMetadataPanel;
     private EntropyVisualizerPanel entropyVisualizerPanel;
     private BinaryDiffPanel binaryDiffPanel;
+    private JavaClassStructurePanel javaClassStructurePanel;
 
     private JTabbedPane tabbedPane;
     private JLabel signatureBadge;
@@ -120,11 +121,13 @@ public class HexAnalyzerApp extends JFrame {
             hexViewer.requestFocusInWindow();
         });
 
+        javaClassStructurePanel = new JavaClassStructurePanel();
         fileMetadataPanel = new FileMetadataPanel();
 
         tabbedPane = new JTabbedPane();
         tabbedPane.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
         tabbedPane.addTab("Hex / Binary Viewer", hexScrollPane);
+        tabbedPane.addTab("Java Bytecode & Class Inspector", javaClassStructurePanel);
         tabbedPane.addTab("Extracted Strings", stringExtractorPanel);
         tabbedPane.addTab("Visual Entropy & Distribution", entropyVisualizerPanel);
         tabbedPane.addTab("Binary Diff & Compare", binaryDiffPanel);
@@ -673,6 +676,7 @@ public class HexAnalyzerApp extends JFrame {
         statusFileSizeLabel.setText("Size: " + df.format(doc.getFileSize()) + " bytes");
 
         fileMetadataPanel.updateMetadata(doc, sig);
+        javaClassStructurePanel.inspectClass(doc.getData());
         entropyVisualizerPanel.setDocument(doc);
         binaryDiffPanel.setDocumentA(doc);
         updateModificationStatus();
